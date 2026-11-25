@@ -60,6 +60,7 @@ EditModeOverlays.lua
 # Modules (Logic)
 Modules\Chat.lua
 Modules\DamageMeter.lua
+Modules\DamageMeterMinimap.lua
 Modules\ActionBars.lua
 Modules\ProcGlow.lua
 Modules\XPBar.lua

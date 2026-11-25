@@ -84,7 +84,7 @@ S:Row{ key = "dm.barTexture", kind = "choice", path = "damagemeter.barTexture", 
 S:Row{ key = "dm.resetOnInstance", path = "damagemeter.resetOnInstance", section = "dm.tweaks", half = true }
 S:Row{ key = "dm.resetOnGroupLeave", path = "damagemeter.resetOnGroupLeave", section = "dm.tweaks", half = true }
 S:Row{ key = "dm.matchChat", path = "damagemeter.matchChatSize", apply = Refresh, section = "dm.tweaks", half = true,
-    disabled = function() return ChatOff() or InChat() end }   -- (greyed with Chat off: turning Chat on makes it work)
+    disabled = function() return ChatOff() or InChat() or S:GetPath("damagemeter.minimapDock") end }   -- (greyed with Chat off: turning Chat on makes it work; docked by the minimap, the dock sizes it)
 S:Row{ key = "dm.combatTimer", path = "damagemeter.combatTimer", apply = Refresh, section = "dm.tweaks", half = true }
 
 -- Meter Tab in the Chat: one dropdown of toggles over the old switch (chatTab) and Open the
@@ -108,6 +108,30 @@ S:Row{ key = "dm.chatTab", kind = "dropdown", section = "dm.meterTab", disabled 
 -- greyed while the tab is off (no indent)
 S:Row{ key = "dm.chatTabIgnoreFade", path = "damagemeter.chatTabIgnoreFade", apply = Refresh, section = "dm.meterTab",
     disabled = function() return ChatOff() or NotInChat() end }
+
+-- Dock Beside the Minimap (Modules/DamageMeterMinimap.lua): one choice over the switch (minimapDock)
+-- and the side (minimapDockSide). Greyed with the Meter tab in the chat, which wins.
+local function NotDocked() return InChat() or not S:GetPath("damagemeter.minimapDock") end
+S:Row{ key = "dm.mapDock", kind = "choice", section = "dm.mapDock", disabled = InChat,
+    choices = { "off", "left", "right", "bottom" },
+    get = function()
+        if not S:GetPath("damagemeter.minimapDock") then return "off" end
+        return S:GetPath("damagemeter.minimapDockSide") or "left"
+    end,
+    set = function(value)
+        local on = value ~= nil and value ~= "off"
+        S:SetPath("damagemeter.minimapDock", on)
+        if on then
+            S:SetPath("damagemeter.minimapDockSide", value)
+            S:SetPath("damagemeter.minimapDockOpen", true)   -- picked: out, so it can be seen
+        end
+    end,
+    resetValue = function() return "off" end,
+    apply = function() Refresh(); ApplyVisibility() end }
+local DOCK_SIZES = {}
+for n = 120, 400, 10 do DOCK_SIZES[#DOCK_SIZES + 1] = { n, n .. " px" } end
+S:Row{ key = "dm.mapDockSize", kind = "range", path = "damagemeter.minimapDockSize", choices = DOCK_SIZES,
+    apply = Refresh, section = "dm.mapDock", disabled = NotDocked }
 
 -- Threat tab options: a change shows the Threat tab, with sample rows when nothing is targeted
 local function PreviewThreat()

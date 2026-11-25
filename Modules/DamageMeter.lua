@@ -86,6 +86,20 @@ local function GetBorderFile(db)
     if not (name and LSM:IsValid("border", name)) then name = DEFAULT_BORDER end
     return LSM:Fetch("border", name)
 end
+-- (the minimap dock's fold tab takes the meter's border and header golds: DamageMeterMinimap.lua)
+DamageMeter.BorderFile = GetBorderFile
+DamageMeter.HEADER_COLORS = { title = TITLE_COLOR, icon = ICON_COLOR }
+
+-- Dock Beside the Minimap (DamageMeterMinimap.lua, loaded after this file): docked there, and folded
+-- away by its tab. Asked from here, so false while that file isn't loaded (the tests load this alone).
+function DamageMeter.MapDocked()
+    local dock = DamageMeter.MapDock
+    return dock ~= nil and dock.On() or false
+end
+function DamageMeter.MapFolded()
+    local dock = DamageMeter.MapDock
+    return dock ~= nil and dock.On() and dock.Folded() or false
+end
 
 local function SafeCall(fn, ...)
     local ok, err = pcall(fn, ...)
@@ -2178,6 +2192,7 @@ function ChatTabOn()
     if ns.IsGamepadUI() then return false end
     return (db ~= nil and db.enabled and db.chatTab and ChatModuleOn() and ChatSkin() ~= nil) and true or false
 end
+DamageMeter.ChatTabOn = ChatTabOn   -- (the minimap dock gives way to the Meter tab)
 
 local MatchChatSize
 local function MatchChatSizeBody()
@@ -2186,6 +2201,8 @@ local function MatchChatSizeBody()
     local inChat = ChatTabOn()
     if matchSizing or not (db and db.enabled and (db.matchChatSize or inChat) and meter) or InCombatLockdown() then return end
     if not ChatModuleOn() then return end
+    -- docked beside the minimap: the dock sizes it (Match Chat Size waits)
+    if not inChat and DamageMeter.MapDocked() then return end
     local source = inChat and ChatSkin() or ChatSizeSource()
     if not source then return end
     local width, height = source:GetSize()
@@ -2308,6 +2325,8 @@ function DamageMeter:Refresh()
         self.sizeMatched = nil
         self:RestoreEditModeSize()
     end
+    -- Dock Beside the Minimap: placed and sized there, or let go (DamageMeterMinimap.lua)
+    if DamageMeter.MapDock then SafeCall(DamageMeter.MapDock.Apply) end
     -- Meter Tab in the Chat switched on or off: the visibility rules change hands (ApplyVisibility)
     if (inChat and MeterAllowed()) ~= (self.chatTabApplied or false) then self:ApplyVisibility() end
     -- the chat draws or drops its Meter tab (Blizzard's switch may have changed too)
@@ -2524,6 +2543,9 @@ function DamageMeter.FadeMouse()
 end
 
 local function FadeStep(self, meter, elapsed)
+    -- the minimap dock's tab sliding the meter in or out sets its alpha meanwhile; the fade goes on after
+    local dock = DamageMeter.MapDock
+    if dock and dock.animating then return end
     -- While waiting for the cursor, a check every 0.1 s is enough.
     self.restWait = (self.restWait or 0) + elapsed
     if self.atRest and self.restWait < 0.1 then return end
@@ -2648,6 +2670,14 @@ local function ApplyVisibilityBody(meter)
         autoFading = false
         meter:Hide()
         if DamageMeter.viewBackPending then DamageMeter.ShowDamageViews() end
+        meter.FlareUI_Up = false
+    elseif DamageMeter.MapFolded() then
+        -- folded away beside the minimap (DamageMeterMinimap.lua), whatever its Visibility: hidden once
+        -- the tab's slide is done (the slide sets the alpha meanwhile), until the tab opens it again
+        CancelFadeDelay()
+        fadeTarget, hideWhenFaded, autoFading = 0, false, false
+        fadeDriver:Hide()
+        if not DamageMeter.MapDock.animating then meter:Hide() end
         meter.FlareUI_Up = false
     elseif DamageMeter.Wanted() then
         CancelFadeDelay()

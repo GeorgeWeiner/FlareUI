@@ -1388,6 +1388,19 @@ ns.Copy = {
             tags = { "frame style", "meter style", "header strip", "flareui look", "modern" },
             tip = L["Border shows with Modern only. Inside the chat (Meter Tab in the Chat), the chat's frame is the meter's."],
         },
+        ["dm.mapDock"] = {
+            choices = { L["Off"], L["Left"], L["Right"], L["Below"] },
+            desc = L["Docks the meter on one side of the minimap, as tall as the map beside it or as wide as the map below it. Point at the map for a small tab that folds the meter away and brings it back."],
+            label = L["Dock Beside the Minimap"],
+            section = "dm.mapDock",
+            tags = { "minimap", "dock", "fold", "collapse", "slide", "side panel" },
+            tip = L["Folded, the meter stays hidden whatever its Visibility. Opened in a fight, a folded meter comes back once the fight ends."],
+        },
+        ["dm.mapDockSize"] = {
+            desc = L["How wide the docked meter is beside the minimap, or how tall below it."],
+            label = L["Dock Size"],
+            section = "dm.mapDock",
+        },
         ["dm.matchChat"] = {
             desc = L["The meter takes the chat's width and height. Off: it goes back to its Edit Mode size."],
             label = L["Match Chat Size"],
@@ -3493,6 +3506,7 @@ ns.Copy = {
         ["ch.tweaks"] = L["Tweaks"],
         ["dm.fonts"] = L["Meters"],
         ["dm.frame"] = L["Frame"],
+        ["dm.mapDock"] = L["Beside the Minimap"],
         ["dm.meterTab"] = L["Meters in Chat"],
         ["dm.threat"] = L["Threat Meter"],
         ["dm.threatBars"] = L["Threat Bars"],

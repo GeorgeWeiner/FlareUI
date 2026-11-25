@@ -345,6 +345,7 @@ Settings.GAMEPAD_OFF = {
     ["bl.bagView"] = true, ["bl.bagWithCharacter"] = true,
     ["bl.bankColumns"] = true, ["bl.bankGaps"] = true, ["bl.bankTight"] = true,
     ["dm.chatTab"] = true, ["dm.chatTabIgnoreFade"] = true, ["tt.mouseover"] = true,
+    ["dm.mapDock"] = true, ["dm.mapDockSize"] = true,
     ["qol.autoAcceptQuests"] = true, ["qol.autoTurnInQuests"] = true, ["qol.mailBook"] = true,
     ["qol.bulkBuy"] = true, ["qol.merchantWide"] = true, ["qol.fishCast"] = true, ["qol.cameraZoomSpeed"] = true,
     ["qol.move"] = true,
